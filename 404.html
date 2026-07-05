@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>পাওয়া যায়নি — Mohammad Abdul Haque</title>
+<meta name="theme-color" content="#9a5b34" />
+<meta name="robots" content="noindex" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>✦</text></svg>" />
+<!-- base path: রুট ("/") নাকি প্রজেক্ট-পেজ সাবপাথ — দুটোতেই কাজ করে -->
+<script>
+  (function () {
+    var seg = location.pathname.split("/")[1] || "";
+    window.__BASE__ = location.hostname.endsWith("github.io") && seg ? "/" + seg + "/" : "/";
+    document.write('<link rel="stylesheet" href="' + window.__BASE__ + 'assets/style.css?v=2">');
+  })();
+</script>
+<script>document.addEventListener("DOMContentLoaded",function(){var s=document.createElement("script");s.src=window.__BASE__+"assets/main.js?v=2";document.body.appendChild(s);});</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="#" class="brand" id="home1">Mohammad Abdul Haque<span class="dot">.</span></a>
+    <nav class="nav">
+      <a href="#" id="home2">লেখা</a>
+      <a href="#" id="about1">পরিচিতি</a>
+      <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="থিম পরিবর্তন">☾</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section class="notfound">
+    <p class="big">৪০৪</p>
+    <h1 style="font-family:var(--display)">এই পাতাটি খুঁজে পাওয়া যায়নি</h1>
+    <p style="color:var(--ink-soft)">হয়তো লেখাটি সরে গেছে, কিংবা ঠিকানায় ছোট্ট কোনো ভুল আছে।</p>
+    <p style="margin-top:24px"><a href="#" id="home3" class="read-more">সব লেখায় ফিরে যান →</a></p>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var b = window.__BASE__ || "/";
+    ["home1", "home2", "home3"].forEach(function (id) { var e = document.getElementById(id); if (e) e.href = b; });
+    var a = document.getElementById("about1"); if (a) a.href = b + "about.html";
+  })();
+</script>
+</body>
+</html>

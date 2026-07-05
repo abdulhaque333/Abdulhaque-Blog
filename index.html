@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mohammad Abdul Haque — ব্লগ</title>
+<meta name="description" content="মোহাম্মদ আবদুল হকের ব্যক্তিগত ব্লগ — বাংলা, আরবি ও ইংরেজিতে নানা বিষয়ে লেখালেখি: ভাবনা, বই, বিশ্বাস ও প্রতিদিনের জীবন।" />
+<meta name="theme-color" content="#9a5b34" />
+<meta name="author" content="Mohammad Abdul Haque" />
+<link rel="canonical" href="https://abdulhaque.netlify.app/" />
+
+<meta property="og:title" content="Mohammad Abdul Haque — ব্লগ" />
+<meta property="og:description" content="বাংলা, আরবি ও ইংরেজিতে নানা বিষয়ে লেখালেখি।" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://abdulhaque.netlify.app/" />
+<meta property="og:locale" content="bn_BD" />
+<meta name="twitter:card" content="summary" />
+
+<link rel="alternate" type="application/rss+xml" title="Mohammad Abdul Haque — ব্লগ" href="feed.xml" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>✦</text></svg>" />
+<link rel="stylesheet" href="assets/style.css?v=2" />
+<script src="assets/main.js?v=2" defer></script>
+<script src="posts.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="brand">Mohammad Abdul Haque<span class="dot">.</span></a>
+    <nav class="nav">
+      <a href="index.html">লেখা</a>
+      <a href="about.html">পরিচিতি</a>
+      <a href="feed.xml">RSS</a>
+      <button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="থিম পরিবর্তন">☾</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="hero">
+    <p class="kicker">ব্যক্তিগত জার্নাল</p>
+    <h1>চিন্তা, বিশ্বাস ও কর্ম</h1>
+    <p>আসসালামু আলাইকুম। আমি মোহাম্মদ আবদুল হক। এখানে বাংলা, আরবি ও মাঝেমধ্যে ইংরেজিতে লিখি — যা ভাবি, যা পড়ি, যা শিখি।</p>
+    <hr class="rule" />
+  </section>
+
+  <div class="filters" id="filters" role="group" aria-label="ক্যাটাগরি অনুযায়ী ছাঁকনি">
+    <button class="filter-btn active" data-cat="">সব</button>
+  </div>
+
+  <h2 class="cat-heading" id="cat-heading" hidden></h2>
+
+  <ul class="post-list" id="post-list">
+    <li class="empty">লেখা লোড হচ্ছে…</li>
+  </ul>
+
+</main>
+
+<footer class="site-footer">
+  <div class="socials">
+    <a href="mailto:abdulhaque333@gmail.com">ইমেইল</a>
+    <a href="about.html">পরিচিতি</a>
+    <a href="feed.xml">RSS</a>
+  </div>
+  <p>© <span id="year"></span> Mohammad Abdul Haque · নিজ হাতে লেখা ও বানানো</p>
+</footer>
+
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>

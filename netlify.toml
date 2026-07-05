@@ -1,0 +1,30 @@
+# ব্লগের জন্য আলাদা Netlify সাইটের কনফিগ।
+# Netlify ড্যাশবোর্ডে নতুন সাইট বানানোর সময়:
+#   Base directory    = docs/blog
+#   Build command     = python3 generate.py   (নিচেও দেওয়া আছে)
+#   Publish directory = docs/blog              (base দিলে শুধু ".")
+# তাহলে ব্লগটি ওই সাইটের রুটে (যেমন abdulhaque.netlify.app/) সার্ভ হবে।
+
+[build]
+  publish = "."
+  command = "python3 generate.py"
+
+[build.environment]
+  PYTHON_VERSION = "3.11"
+  # সাইট তৈরির পর নিচের লাইনটি আপনার আসল Netlify ঠিকানায় বদলে দিন
+  # (RSS feed ও sitemap-এর লিংক ঠিক হওয়ার জন্য):
+  SITE_URL = "https://abdulhaque.netlify.app"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# অ্যাসেট (main.js/style.css) নির্দিষ্ট নামেই থাকে, তাই immutable দীর্ঘ ক্যাশ দিলে
+# আপডেট আর দেখা যায় না। always-revalidate রাখলে পরিবর্তন সঙ্গে সঙ্গে দেখা যায়।
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
