@@ -25,8 +25,8 @@
   --code-bg: #efe8da;
   --shadow: 0 1px 2px rgba(60,45,25,.05), 0 10px 36px rgba(60,45,25,.07);
 
-  --serif: 'Source Serif 4', Georgia, serif;
-  --display: 'Fraunces', 'Source Serif 4', Georgia, serif;
+  --serif: 'Source Serif 4', 'Noto Serif Bengali', Georgia, serif;
+  --display: 'Fraunces', 'Noto Serif Bengali', 'Source Serif 4', Georgia, serif;
   --bn: 'Noto Serif Bengali', 'Hind Siliguri', system-ui, sans-serif;
   --ar: 'Amiri', 'Noto Naskh Arabic', 'Geeza Pro', serif;
   --ui: 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -50,6 +50,7 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { overflow-x: clip; }
 
 body {
   margin: 0;
@@ -109,13 +110,13 @@ img { max-width: 100%; height: auto; border-radius: 8px; }
 /* ---------- Hero ---------- */
 .hero { padding: 72px 0 40px; text-align: center; }
 .hero .kicker {
-  font-family: var(--ui); text-transform: uppercase; letter-spacing: .22em;
-  font-size: .72rem; color: var(--gold); font-weight: 600; margin-bottom: 18px;
+  font-family: var(--ui); letter-spacing: .04em;
+  font-size: .84rem; color: var(--gold); font-weight: 700; margin-bottom: 18px;
 }
 .hero h1 {
   font-family: var(--display); font-weight: 600;
-  font-size: clamp(2.1rem, 6vw, 3.2rem); line-height: 1.08;
-  margin: 0 auto 16px; letter-spacing: -.02em; max-width: 12ch;
+  font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.28;
+  margin: 0 auto 16px; max-width: 14ch;
 }
 .hero p {
   color: var(--ink-soft); margin: 0 auto; max-width: 46ch;
@@ -143,7 +144,7 @@ img { max-width: 100%; height: auto; border-radius: 8px; }
   font-family: var(--display);
   font-weight: 600;
   font-size: clamp(1.4rem, 4vw, 1.8rem);
-  letter-spacing: -.01em;
+  line-height: 1.45;
   margin: 0 0 26px;
   padding-bottom: 12px;
   border-bottom: 2px solid var(--accent);
@@ -174,7 +175,7 @@ a.cat-chip:hover { background: var(--gold); color: #fff; text-decoration: none; 
 .post-item .post-meta { margin-bottom: 8px; }
 .post-item h2 {
   margin: 0 0 8px; font-family: var(--display); font-weight: 600;
-  font-size: 1.55rem; line-height: 1.25; letter-spacing: -.015em;
+  font-size: 1.5rem; line-height: 1.45;
 }
 .post-item[data-lang="bn"] h2 { font-family: var(--bn); font-weight: 600; }
 .post-item[data-lang="ar"] h2 { font-family: var(--ar); font-weight: 700; }
@@ -208,8 +209,8 @@ a.cat-chip:hover { background: var(--gold); color: #fff; text-decoration: none; 
 .article > .post-meta { justify-content: center; margin-bottom: 14px; }
 .article h1 {
   font-family: var(--display); font-weight: 600; text-align: center;
-  font-size: clamp(1.9rem, 5vw, 2.7rem); line-height: 1.15;
-  letter-spacing: -.02em; margin: 0 auto 14px; max-width: 18ch;
+  font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.35;
+  margin: 0 auto 14px; max-width: 22ch;
 }
 .article.lang-bn h1 { font-family: var(--bn); }
 .article.lang-ar h1 { font-family: var(--ar); }
@@ -305,9 +306,20 @@ a.cat-chip:hover { background: var(--gold); color: #fff; text-decoration: none; 
 /* ---------- Responsive ---------- */
 @media (max-width: 600px) {
   body { font-size: 18px; }
-  .hero { padding: 52px 0 30px; }
+  .container { padding: 0 18px; }
+  .site-header .bar { padding: 10px 12px; gap: 8px; flex-wrap: wrap; }
+  .brand { font-size: .95rem; }
+  .nav { gap: 0; }
+  .nav a { padding: 6px 7px; font-size: .8rem; }
+  .theme-toggle { width: 31px; height: 31px; font-size: .85rem; margin-inline-start: 3px; flex-shrink: 0; }
+  .hero { padding: 48px 0 28px; }
+  .hero h1 { font-size: clamp(1.85rem, 7.5vw, 2.4rem); }
+  .hero p { font-size: 1.02rem; }
+  .filters { gap: 6px; }
+  .filter-btn { padding: 5px 12px; font-size: .8rem; }
+  .post-item { padding: 26px 0; }
+  .post-item h2 { font-size: 1.28rem; }
   .article { padding: 40px 0 24px; }
-  .nav a { padding: 7px 9px; font-size: .88rem; }
   .prose > p:first-of-type::first-letter { font-size: 2.8em; }
 }
 
