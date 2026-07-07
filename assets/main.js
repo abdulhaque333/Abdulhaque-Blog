@@ -49,6 +49,85 @@
     return m ? decodeURIComponent(m[1]) : "";
   }
 
+  /* ---- Full-text search ---- */
+  let query = "";               // বর্তমান সার্চ-টোকেনসমূহ (স্পেসে ভাগ)
+  let indexState = "none";      // none | loading | ready
+  let lowerIndex = null;        // slug → ছোট-হাতের পূর্ণ টেক্সট
+
+  function normalize(s) {
+    return String(s).normalize("NFC").toLowerCase();
+  }
+  function tokens() {
+    return query ? query.split(/\s+/).filter(Boolean) : [];
+  }
+
+  /* প্রথম সার্চেই ইনডেক্সটা (search-index.js) নামিয়ে নেয় */
+  function ensureIndex() {
+    if (indexState !== "none") return;
+    indexState = "loading";
+    const s = document.createElement("script");
+    s.src = "search-index.js";
+    s.onload = function () {
+      lowerIndex = {};
+      for (const slug in (window.SEARCH_INDEX || {}))
+        lowerIndex[slug] = normalize(window.SEARCH_INDEX[slug]);
+      indexState = "ready";
+      renderList();
+    };
+    s.onerror = function () { indexState = "none"; };
+    document.head.appendChild(s);
+  }
+
+  function haystack(p) {
+    if (indexState === "ready" && lowerIndex && lowerIndex[p.slug] !== undefined)
+      return lowerIndex[p.slug];
+    const c = catBy(p.category);
+    return normalize([p.title, p.excerpt || "", (p.tags || []).join(" "),
+                      c ? c.name : ""].join(" "));
+  }
+  function matches(p, toks) {
+    const h = haystack(p);
+    return toks.every((t) => h.includes(t));
+  }
+
+  function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  /* এস্কেপ-করা টেক্সটে টোকেনগুলো <mark> দিয়ে চিহ্নিত করে */
+  function highlight(escaped, toks) {
+    let out = escaped;
+    toks.forEach((t) => {
+      out = out.replace(new RegExp(escapeRe(esc(t)), "gi"), '<mark class="hl">$&</mark>');
+    });
+    return out;
+  }
+  /* ম্যাচের আশপাশ থেকে ~১৬০ অক্ষরের অংশ তুলে আনে */
+  function snippet(p, toks) {
+    if (indexState !== "ready" || !window.SEARCH_INDEX || !window.SEARCH_INDEX[p.slug])
+      return highlight(esc(p.excerpt || ""), toks);
+    const raw = window.SEARCH_INDEX[p.slug];
+    const low = lowerIndex[p.slug];
+    let pos = -1;
+    for (const t of toks) { pos = low.indexOf(t); if (pos !== -1) break; }
+    if (pos === -1) return highlight(esc(p.excerpt || ""), toks);
+    const start = Math.max(0, pos - 60);
+    const end = Math.min(raw.length, pos + 120);
+    const piece = (start > 0 ? "…" : "") + raw.slice(start, end).trim() +
+                  (end < raw.length ? "…" : "");
+    return highlight(esc(piece), toks);
+  }
+
+  function updateStatus(shown) {
+    const el = document.getElementById("search-status");
+    if (!el) return;
+    if (!query) { el.hidden = true; el.textContent = ""; return; }
+    el.hidden = false;
+    if (indexState === "loading")
+      el.innerHTML = "পূর্ণ লেখার সূচি লোড হচ্ছে… আপাতত শিরোনামে খোঁজা হলো — <b>" + bnNum(shown) + "টি</b> লেখা";
+    else
+      el.innerHTML = shown
+        ? "<b>" + bnNum(shown) + "টি</b> লেখা মিলেছে"
+        : "কিছু মেলেনি — অন্য শব্দ চেষ্টা করুন";
+  }
+
   function bnNum(n) {
     return String(n).replace(/[0-9]/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
   }
@@ -96,12 +175,18 @@
       else { heading.textContent = ""; heading.hidden = true; }
     }
 
+    const toks = tokens();
     const posts = window.POSTS.slice()
       .sort((a, b) => (a.date < b.date ? 1 : -1))
-      .filter((p) => !filter || p.category === filter);
+      .filter((p) => !filter || p.category === filter)
+      .filter((p) => !toks.length || matches(p, toks));
+
+    updateStatus(posts.length);
 
     if (!posts.length) {
-      list.innerHTML = '<li class="empty">এই ক্যাটাগরিতে এখনো কোনো লেখা নেই।</li>';
+      list.innerHTML = toks.length
+        ? '<li class="empty">এই খোঁজে কোনো লেখা মেলেনি।</li>'
+        : '<li class="empty">এই ক্যাটাগরিতে এখনো কোনো লেখা নেই।</li>';
       return;
     }
 
@@ -121,17 +206,42 @@
           <span>${fmtDate(p.date, p.lang)}</span>
           ${tags ? `<span class="dot-sep">·</span>${tags}` : ""}
         </div>
-        <h2><a href="${url}">${esc(p.title)}</a></h2>
-        <p class="excerpt">${esc(p.excerpt || "")}</p>
+        <h2><a href="${url}">${toks.length ? highlight(esc(p.title), toks) : esc(p.title)}</a></h2>
+        <p class="excerpt">${toks.length ? snippet(p, toks) : esc(p.excerpt || "")}</p>
         <a class="read-more" href="${url}">${READ_MORE[p.lang] || "Read"}</a>
       </li>`;
     }).join("");
+  }
+
+  function wireSearch() {
+    const input = document.getElementById("search-input");
+    const clear = document.getElementById("search-clear");
+    if (!input) return;
+    let timer = null;
+    input.addEventListener("input", function () {
+      if (clear) clear.hidden = !input.value;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        query = normalize(input.value).trim();
+        if (query) ensureIndex();
+        renderList();
+      }, 180);
+    });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { input.value = ""; input.dispatchEvent(new Event("input")); }
+    });
+    if (clear) clear.addEventListener("click", function () {
+      input.value = "";
+      input.dispatchEvent(new Event("input"));
+      input.focus();
+    });
   }
 
   document.addEventListener("DOMContentLoaded", function () {
     if (!document.getElementById("post-list")) return;
     renderFilters();
     renderList();
+    wireSearch();
     window.addEventListener("hashchange", renderList);
   });
 })();

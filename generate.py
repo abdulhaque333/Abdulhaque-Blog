@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Regenerate sitemap.xml and feed.xml (RSS) from posts.js.
+Regenerate sitemap.xml, feed.xml (RSS) and search-index.js from posts.js.
 
 ব্যবহার:  cd blog && python3 generate.py
-নতুন লেখা posts.js-এ যোগ করার পর একবার চালালেই ফিড ও সাইটম্যাপ আপডেট হয়।
+নতুন লেখা posts.js-এ যোগ করার পর একবার চালালেই ফিড, সাইটম্যাপ ও
+সার্চ-ইনডেক্স আপডেট হয়।
 
 ডিপ্লয়ের আগে SITE_URL নিজের আসল ঠিকানায় বদলে নিন।
 """
@@ -12,6 +13,7 @@ import json
 import os
 import re
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -80,11 +82,58 @@ def build_feed(posts):
     )
 
 
+class _ArticleText(HTMLParser):
+    """একটি পোস্ট-পেজের <article>-এর ভেতরের দৃশ্যমান টেক্সট বের করে।"""
+
+    def __init__(self):
+        super().__init__()
+        self.in_article = False
+        self.skip_depth = 0
+        self.chunks = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "article":
+            self.in_article = True
+        elif self.in_article and tag in ("script", "style"):
+            self.skip_depth += 1
+
+    def handle_endtag(self, tag):
+        if tag == "article":
+            self.in_article = False
+        elif self.in_article and tag in ("script", "style"):
+            self.skip_depth = max(0, self.skip_depth - 1)
+
+    def handle_data(self, data):
+        if self.in_article and not self.skip_depth:
+            self.chunks.append(data)
+
+
+def post_text(slug):
+    path = HERE / "posts" / f"{slug}.html"
+    if not path.exists():
+        return ""
+    parser = _ArticleText()
+    parser.feed(path.read_text(encoding="utf-8"))
+    return re.sub(r"\s+", " ", " ".join(parser.chunks)).strip()
+
+
+def build_search_index(posts):
+    """slug → লেখার পূর্ণ টেক্সট (শিরোনাম+ট্যাগসহ), সার্চের জন্য।"""
+    index = {}
+    for p in posts:
+        parts = [p.get("title", ""), post_text(p["slug"])]
+        parts += p.get("tags", [])
+        index[p["slug"]] = re.sub(r"\s+", " ", " ".join(parts)).strip()
+    payload = json.dumps(index, ensure_ascii=False, separators=(",", ":"))
+    return f"window.SEARCH_INDEX={payload};\n"
+
+
 def main():
     posts = load_posts()
     (HERE / "sitemap.xml").write_text(build_sitemap(posts), encoding="utf-8")
     (HERE / "feed.xml").write_text(build_feed(posts), encoding="utf-8")
-    print(f"✓ {len(posts)}টি লেখা থেকে sitemap.xml ও feed.xml তৈরি হলো।")
+    (HERE / "search-index.js").write_text(build_search_index(posts), encoding="utf-8")
+    print(f"✓ {len(posts)}টি লেখা থেকে sitemap.xml, feed.xml ও search-index.js তৈরি হলো।")
 
 
 if __name__ == "__main__":
