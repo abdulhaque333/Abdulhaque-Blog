@@ -54,6 +54,11 @@
   let indexState = "none";      // none | loading | ready
   let lowerIndex = null;        // slug → ছোট-হাতের পূর্ণ টেক্সট
 
+  /* একসাথে সব না এঁকে ধাপে ধাপে দেখাই — টাইপিং মসৃণ থাকে */
+  const PAGE = 60;
+  let shownCount = PAGE;
+  let lastKey = null;
+
   function normalize(s) {
     return String(s).normalize("NFC").toLowerCase();
   }
@@ -176,8 +181,12 @@
     }
 
     const toks = tokens();
-    const posts = window.POSTS.slice()
-      .sort((a, b) => (a.date < b.date ? 1 : -1))
+    const key = query + "|" + filter;
+    if (key !== lastKey) { shownCount = PAGE; lastKey = key; }
+
+    if (!renderList._sorted)
+      renderList._sorted = window.POSTS.slice().sort((a, b) => (a.date < b.date ? 1 : -1));
+    const posts = renderList._sorted
       .filter((p) => !filter || p.category === filter)
       .filter((p) => !toks.length || matches(p, toks));
 
@@ -190,7 +199,10 @@
       return;
     }
 
-    list.innerHTML = posts.map((p) => {
+    const visible = posts.slice(0, shownCount);
+    const remaining = posts.length - visible.length;
+
+    list.innerHTML = visible.map((p) => {
       const dir = LANG_DIR[p.lang] || "ltr";
       const tags = (p.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
       const url = `posts/${encodeURIComponent(p.slug)}.html`;
@@ -210,13 +222,17 @@
         <p class="excerpt">${toks.length ? snippet(p, toks) : esc(p.excerpt || "")}</p>
         <a class="read-more" href="${url}">${READ_MORE[p.lang] || "Read"}</a>
       </li>`;
-    }).join("");
+    }).join("") + (remaining > 0
+      ? `<li class="load-more"><button class="load-more-btn" type="button">আরও দেখুন <span class="count">(${bnNum(remaining)}টি বাকি)</span></button></li>`
+      : "");
   }
 
   function wireSearch() {
     const input = document.getElementById("search-input");
     const clear = document.getElementById("search-clear");
     if (!input) return;
+    /* বক্সে হাত দেওয়ামাত্রই সূচি নামা শুরু — প্রথম খোঁজায় আর অপেক্ষা নয় */
+    input.addEventListener("focus", ensureIndex, { once: true });
     let timer = null;
     input.addEventListener("input", function () {
       if (clear) clear.hidden = !input.value;
@@ -225,7 +241,7 @@
         query = normalize(input.value).trim();
         if (query) ensureIndex();
         renderList();
-      }, 180);
+      }, 120);
     });
     input.addEventListener("keydown", function (e) {
       if (e.key === "Escape") { input.value = ""; input.dispatchEvent(new Event("input")); }
@@ -238,10 +254,14 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    if (!document.getElementById("post-list")) return;
+    const list = document.getElementById("post-list");
+    if (!list) return;
     renderFilters();
     renderList();
     wireSearch();
+    list.addEventListener("click", function (e) {
+      if (e.target.closest(".load-more-btn")) { shownCount += PAGE * 2; renderList(); }
+    });
     window.addEventListener("hashchange", renderList);
   });
 })();
